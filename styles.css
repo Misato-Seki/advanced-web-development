@@ -1,0 +1,36 @@
+body {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    align-content: center;
+    margin-bottom: 20px;
+}
+
+a {
+    margin: 10px;
+}
+
+section {
+    margin: 30px
+}
+
+form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+input, textarea, button {
+    margin-right: 20px;
+}
+
+@media (max-width: 600px) {
+    form {
+        flex-direction: column;
+    }
+    input, textarea, button {
+        margin-bottom: 20px;
+    }
+}
