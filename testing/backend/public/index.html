@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+    .user-list {
+      margin-top: 20px;
+    }
+    .user-item {
+      padding: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: #e53935;
+    }
+    .delete-all-btn {
+      background-color: #ff5722;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .delete-all-btn:hover {
+      background-color: #e64a19;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>User Management</h1>
+
+    <!-- Form to add a new user -->
+    <div class="form-group">
+      <label for="firstName">First Name</label>
+      <input type="text" id="firstName" placeholder="Enter First Name">
+    </div>
+    <div class="form-group">
+      <label for="lastName">Last Name</label>
+      <input type="text" id="lastName" placeholder="Enter Last Name">
+    </div>
+    <div class="form-group">
+      <label for="phoneNumber">Phone Number</label>
+      <input type="text" id="phoneNumber" placeholder="Enter Phone Number">
+    </div>
+    <button class="btn" id="addUserBtn">Add User</button>
+
+    <!-- Display users -->
+    <div class="user-list">
+      <button class="delete-all-btn" id="deleteAllBtn">Delete All Users</button>
+      <h2>Users</h2>
+      <ul id="userList">
+        <!-- List of users will appear here -->
+      </ul>
+      <!-- Button to delete all users -->
+    </div>
+  </div>
+
+  <script>
+    const addUserBtn = document.getElementById('addUserBtn');
+    const deleteAllBtn = document.getElementById('deleteAllBtn');
+    const userList = document.getElementById('userList');
+
+    // Function to fetch all users and display them
+    function fetchUsers() {
+      fetch('http://localhost:3000/users')
+        .then(response => response.json())
+        .then(users => {
+          userList.innerHTML = '';
+          users.forEach(user => {
+            const li = document.createElement('li');
+            li.classList.add('user-item');
+            li.innerHTML = `
+              <strong>${user.firstName} ${user.lastName}</strong> - ${user.phoneNumber}
+              <button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>
+            `;
+            userList.appendChild(li);
+          });
+        })
+        .catch(err => console.error('Error fetching users:', err));
+    }
+
+    // Function to add a new user
+    addUserBtn.addEventListener('click', () => {
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const phoneNumber = document.getElementById('phoneNumber').value;
+
+      if (!firstName || !lastName || !phoneNumber) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const newUser = { firstName, lastName, phoneNumber };
+
+      fetch('http://localhost:3000/add-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('User added:', data);
+          fetchUsers(); // Refresh the user list after adding
+        })
+        .catch(err => console.error('Error adding user:', err));
+    });
+    // Function to delete all users
+    deleteAllBtn.addEventListener('click', () => {
+      fetch('http://localhost:3000/users', {
+        method: 'DELETE',
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('All users deleted:', data);
+          fetchUsers(); // Refresh the user list after deleting all users
+        })
+        .catch(err => console.error('Error deleting all users:', err));
+    });
+
+    // Function to delete a user
+    function deleteUser(userId) {
+      fetch(`http://localhost:3000/users/${userId}`, {
+        method: 'DELETE',
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('User deleted:', data);
+          fetchUsers(); // Refresh the user list after deleting
+        })
+        .catch(err => console.error('Error deleting user:', err));
+    }
+
+    // Initial fetch to display users when page loads
+    fetchUsers();
+  </script>
+
+</body>
+</html>
